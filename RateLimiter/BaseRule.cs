@@ -18,7 +18,7 @@ public interface IRateLimitingRule
 /// <summary>
 /// Base class for rate limiting rules
 /// </summary>
-public abstract class BaseRule : IRateLimitingRule
+public abstract class BaseRule(IEnumerable<RequestLogEntry> log) : IRateLimitingRule
 {
 	/// <summary>
 	/// Factors that can be used to determine if the rule is applicable
@@ -29,7 +29,7 @@ public abstract class BaseRule : IRateLimitingRule
 	/// <summary>
 	/// Common log of requests
 	/// </summary>
-	public IEnumerable<RequestLogEntry> CommonLog { get; set; }
+	public IEnumerable<RequestLogEntry> CommonLog { get; set; } = log;
 
 	/// <summary>
 	/// Check if the request is allowed
@@ -40,9 +40,8 @@ public abstract class BaseRule : IRateLimitingRule
 	public virtual bool IsRequestAllowed(string clientId, Dictionary<string, string>? factors)
 	{
 		// If factors are not set or are not used, the rule is not applicable
-		if (Factors != null && factors?.ContainsAllElements(Factors) != true)
-			return true;
-		return false;
+		return Factors != null 
+			&& factors?.ContainsAllElements(Factors) != true;
 	}
 }
 
@@ -54,7 +53,7 @@ public static class DictionaryComparer
 {
 	public static bool ContainsAllElements<TKey, TValue>(
 		this Dictionary<TKey, TValue> mainDict,
-		Dictionary<TKey, TValue> subDict)
+		Dictionary<TKey, TValue> subDict) where TKey : notnull
 	{
 		return subDict.All(kv => mainDict.ContainsKey(kv.Key) && EqualityComparer<TValue>.Default.Equals(mainDict[kv.Key], kv.Value));
 	}

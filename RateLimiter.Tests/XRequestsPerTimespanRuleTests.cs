@@ -10,7 +10,7 @@ namespace RateLimiter.Tests
 	public class XRequestsPerTimespanRuleTests
 	{
 		//private TimespanSinceLastCallRule _rule;
-		private Dictionary<string, string>? _factors;
+		private Dictionary<string, string> _factors;
 		private ConcurrentQueue<RequestLogEntry> _log;
 
 		[SetUp]
@@ -26,8 +26,7 @@ namespace RateLimiter.Tests
 		[Test]
 		public void IsRequestAllowed_FirstRequest_ReturnsTrue()
 		{
-			var rule = new XRequestsPerTimespanRule(5, TimeSpan.FromSeconds(0.1));
-			rule.CommonLog = _log;
+			var rule = new XRequestsPerTimespanRule(5, TimeSpan.FromSeconds(0.1), _log);
 			var result = rule.IsRequestAllowed("client1", null);
 			Assert.IsTrue(result);
 		}
@@ -35,8 +34,7 @@ namespace RateLimiter.Tests
 		[Test]
 		public void IsRequestAllowed_WithinLimit_ReturnsTrue()
 		{
-			var rule = new XRequestsPerTimespanRule(5, TimeSpan.FromSeconds(0.1));
-			rule.CommonLog = _log;
+			var rule = new XRequestsPerTimespanRule(5, TimeSpan.FromSeconds(0.1), _log);
 			for (int i = 0; i < 4; i++)
 			{
 				var isAllowed = rule.IsRequestAllowed("client1", _factors);
@@ -58,8 +56,7 @@ namespace RateLimiter.Tests
 		[Test]
 		public void IsRequestAllowed_ExceedsLimit_ReturnsFalse()
 		{
-			var rule = new XRequestsPerTimespanRule(5, TimeSpan.FromSeconds(0.1));
-			rule.CommonLog = _log;
+			var rule = new XRequestsPerTimespanRule(5, TimeSpan.FromSeconds(0.1), _log);
 			for (int i = 0; i < 5; i++)
 			{
 				var isAllowed = rule.IsRequestAllowed("client1", _factors); 
@@ -81,8 +78,7 @@ namespace RateLimiter.Tests
 		[Test]
 		public void IsRequestAllowed_AfterTimespan_ReturnsTrue()
 		{
-			var rule = new XRequestsPerTimespanRule(5, TimeSpan.FromSeconds(0.1));
-			rule.CommonLog = _log;
+			var rule = new XRequestsPerTimespanRule(5, TimeSpan.FromSeconds(0.1), _log);
 			for (int i = 0; i < 5; i++)
 			{
 				var isAllowed = rule.IsRequestAllowed("client1", _factors);

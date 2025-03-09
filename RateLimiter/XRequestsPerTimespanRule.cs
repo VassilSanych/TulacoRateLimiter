@@ -8,7 +8,7 @@ namespace RateLimiter;
 /// This rule limits the number of requests a client can make within a specified timespan.
 /// It checks the number of requests made by a client within the given timespan and denies further requests if the limit is exceeded.
 /// </summary>
-public class XRequestsPerTimespanRule(int maxRequests, TimeSpan timespan) : BaseRule
+public class XRequestsPerTimespanRule(int maxRequests, TimeSpan timespan, IEnumerable<RequestLogEntry> log) : BaseRule(log)
 {
 	public override bool IsRequestAllowed(string clientId, Dictionary<string, string>? factors)
 	{
@@ -16,7 +16,7 @@ public class XRequestsPerTimespanRule(int maxRequests, TimeSpan timespan) : Base
 			return true;
 
 		var now = DateTime.UtcNow;
-		var lastDeniedRequest = CommonLog?.LastOrDefault(entry =>
+		var lastDeniedRequest = CommonLog.LastOrDefault(entry =>
 			entry.ClientId == clientId
 			&& entry.IsAllowed == false
 			&& (Factors == null

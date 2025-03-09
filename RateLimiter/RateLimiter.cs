@@ -31,7 +31,6 @@ public class RateLimiter
 		if (!_resourceRules.ContainsKey(resource)) 
 			_resourceRules[resource] = [];
 
-		rule.CommonLog = _requestLog;
 		_resourceRules[resource].Add(rule);
 	}
 
@@ -98,10 +97,7 @@ public class RateLimiter
 	/// Get the request log
 	/// </summary>
 	/// <returns></returns>
-	public IEnumerable<RequestLogEntry>? GetRequestLog()
-	{
-		return _requestLog?.ToArray();
-	}
+	public IEnumerable<RequestLogEntry> GetRequestLog() => _requestLog.ToArray();
 
 
 }

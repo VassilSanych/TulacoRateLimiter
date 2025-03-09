@@ -1,6 +1,4 @@
-﻿using Microsoft.VisualStudio.TestPlatform.CommunicationUtilities.Resources;
-
-using NUnit.Framework;
+﻿using NUnit.Framework;
 
 using System;
 using System.Collections.Concurrent;
@@ -12,16 +10,15 @@ namespace RateLimiter.Tests
 	public class TimespanSinceLastCallRuleTests
 	{
 		private TimespanSinceLastCallRule _rule;
-		private Dictionary<string, string>? _factors;
+		private Dictionary<string, string> _factors;
 		private ConcurrentQueue<RequestLogEntry> _log;
 
 		[SetUp]
 		public void Setup()
 		{
-			_rule = new(TimeSpan.FromSeconds(0.1));
-			_factors = new() { {"k", "v" } };
 			_log = new();
-			_rule.CommonLog = _log;
+			_rule = new(TimeSpan.FromSeconds(0.1), _log);
+			_factors = new() { {"k", "v" } };
 		}
 
 		[Test]

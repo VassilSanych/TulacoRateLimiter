@@ -1,7 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System;
-
 using NUnit.Framework;
 using System.Collections.Concurrent;
 namespace RateLimiter.Tests;
@@ -10,18 +8,22 @@ namespace RateLimiter.Tests;
 public class RateLimiterTests
 {
 		private RateLimiter _rateLimiter;
+		private Dictionary<string, string>? _factors;
+		private ConcurrentQueue<RequestLogEntry> _log;
 
-		[SetUp]
+	[SetUp]
 		public void Setup()
 		{
 			_rateLimiter = new RateLimiter();
-		}
+			_factors = new() { { "k", "v" } };
+			_log = new();
+	}
 
 		[Test]
 		public void IsRequestAllowed_ShouldReturnTrue_WhenAllRulesAllow()
 		{
 			// Arrange
-			var rule = new MockRateLimitingRule { IsAllowed = true };
+			var rule = new MockRateLimitingRule(_log) { IsAllowed = true };
 			_rateLimiter.AddGlobalRule(rule);
 
 			// Act
@@ -35,7 +37,7 @@ public class RateLimiterTests
 		public void IsRequestAllowed_ShouldReturnFalse_WhenAnyRuleDisallows()
 		{
 			// Arrange
-			var rule = new MockRateLimitingRule { IsAllowed = false };
+			var rule = new MockRateLimitingRule(_log) { IsAllowed = false };
 			_rateLimiter.AddGlobalRule(rule);
 
 			// Act
@@ -49,7 +51,7 @@ public class RateLimiterTests
 		public void GetRequestLog_ShouldReturnLogEntries()
 		{
 			// Arrange
-			var rule = new MockRateLimitingRule { IsAllowed = true };
+			var rule = new MockRateLimitingRule(_log) { IsAllowed = true };
 			_rateLimiter.AddGlobalRule(rule);
 			_rateLimiter.IsRequestAllowed("resource1", "client1", null);
 
@@ -61,10 +63,9 @@ public class RateLimiterTests
 		}
 	}
 
-	public class MockRateLimitingRule : BaseRule
+	public class MockRateLimitingRule(IEnumerable<RequestLogEntry> log) : BaseRule(log)
 	{
 		public bool IsAllowed { get; set; }
-		public ConcurrentQueue<RequestLogEntry> CommonLog { get; set; }
 
 		public override bool IsRequestAllowed(string clientId, Dictionary<string, string>? factors)
 		{

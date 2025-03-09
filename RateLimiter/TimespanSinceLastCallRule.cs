@@ -7,7 +7,7 @@ namespace RateLimiter;
 /// <summary>
 /// Rule to limit the certain timespan has passed since the last call
 /// </summary>
-public class TimespanSinceLastCallRule(TimeSpan requiredTimespan) : BaseRule
+public class TimespanSinceLastCallRule(TimeSpan requiredTimespan, IEnumerable<RequestLogEntry> log) : BaseRule(log)
 {
 	public override bool IsRequestAllowed(string clientId, Dictionary<string, string>? factors)
 	{
@@ -15,7 +15,7 @@ public class TimespanSinceLastCallRule(TimeSpan requiredTimespan) : BaseRule
 			return true;
 
 		var now = DateTime.UtcNow;
-		var lastDeniedRequest = CommonLog?.LastOrDefault(entry =>
+		var lastDeniedRequest = CommonLog.LastOrDefault(entry =>
 			entry.ClientId == clientId 
 			&& entry.IsAllowed == false
 			&& (Factors == null
@@ -25,7 +25,7 @@ public class TimespanSinceLastCallRule(TimeSpan requiredTimespan) : BaseRule
 		if (lastDeniedRequest != null && now - lastDeniedRequest.Timestamp <= requiredTimespan)
 			return true;
 
-		var lastRequest = CommonLog?.LastOrDefault(entry => 
+		var lastRequest = CommonLog.LastOrDefault(entry => 
 			entry.ClientId == clientId 
 			&& (Factors == null 
 				|| entry.Factors?.ContainsAllElements(Factors) == true));
